@@ -1,0 +1,9 @@
+[package]
+name = "netiso-srv"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+binrw = "0.14.1"
+glob = "0.3.2"
+tokio = { version = "1", features = ["macros", "net", "io-util", "fs", "rt-multi-thread"] }
