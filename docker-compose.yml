@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  netiso:
+    image: netiso:local
+    volumes:
+      - /x360/games:/mnt
+    ports:
+      - 4323:4323
