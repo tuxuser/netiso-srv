@@ -7,4 +7,4 @@ RUN chmod +x ./netiso-srv
 VOLUME /mnt
 EXPOSE 4323/TCP
 
-CMD ["/app/netiso-srv", "/mnt"]
+CMD ["/app/netiso-srv", "-r", "/mnt"]

@@ -85,11 +85,23 @@ async fn get_data_start(file: &mut File) -> Result<u64, Box<dyn std::error::Erro
     Ok(0)
 }
 
-async fn get_iso_files(directory: &Path) -> Result<Vec<IsoEntry>, Box<dyn std::error::Error>> {
+async fn get_iso_files(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry>, Box<dyn std::error::Error>> {
     let mut ret = vec![];
 
-    let isofiles_glob_pattern = directory.to_str().unwrap().to_string() + "/**/*.iso";
-    println!("{isofiles_glob_pattern}");
+    let isofiles_glob_pattern = {
+        let mut path_glob = directory.to_str().unwrap().to_string();
+        if recursive {
+            path_glob += std::path::MAIN_SEPARATOR_STR;
+            path_glob += "**"
+        }
+
+        path_glob += std::path::MAIN_SEPARATOR_STR;
+        path_glob += "*.iso";
+
+        path_glob
+    };
+
+    println!("Path: {isofiles_glob_pattern}");
     let files: Vec<PathBuf> = glob(&isofiles_glob_pattern)?
         .into_iter()
         .filter_map(|x| x.ok())
@@ -263,17 +275,27 @@ impl Server {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().collect();
     
+    // Check for '-r' (recursive scan) arg
+    let recursive_scan = match args.iter().position(|x| "-r" == x) {
+        Some(removal_index) => {
+            args.remove(removal_index);
+            true
+        },
+        None => false
+    };
+
     if args.len() < 2 {
         eprintln!("ERROR: Invalid number of arguments!");
         eprintln!("Usage: {} [iso directory path]", args[0]);
         return Ok(());
     }
+
     let filepath = Path::new(&args[1]);
 
     println!("Enumerating ISOs in {filepath:?}...");
-    let files = get_iso_files(filepath).await?;
+    let files = get_iso_files(filepath, recursive_scan).await?;
 
     if files.is_empty() {
         return Err("No iso files enumerated".into());

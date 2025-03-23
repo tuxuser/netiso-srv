@@ -2,7 +2,11 @@
 
 ## Usage
 
-Run: `netiso-srv [directory with *.iso files]`
+Options:
+
+    `-r` - Recursive scanning for ISO files
+
+Run: `netiso-srv [-r] [directory with *.iso files]`
 
 
 ## Docker
