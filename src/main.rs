@@ -1,3 +1,5 @@
+#![allow(clippy::upper_case_acronyms)]
+
 use binrw::{BinRead, BinWrite};
 use glob::glob;
 use tokio::fs::File;
@@ -103,7 +105,6 @@ async fn get_iso_files(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry
 
     println!("Path: {isofiles_glob_pattern}");
     let files: Vec<PathBuf> = glob(&isofiles_glob_pattern)?
-        .into_iter()
         .filter_map(|x| x.ok())
         .filter(|x|x.is_file())
         .collect();
@@ -151,7 +152,7 @@ impl Server {
             let mut buffer = [0; 20];
             match socket.read(&mut buffer).await {
                 Ok(size) => {
-                    if size <= 0 {
+                    if size == 0 {
                         eprintln!("EOF - Client '{:?}' disconnected", socket.peer_addr());
                         break
                     }
@@ -162,7 +163,7 @@ impl Server {
                     match msg.cmd_type {
                         Cmd::Ping => {
                             let reply = "ISVRokOK".as_bytes();
-                            socket.try_write(&reply)?;
+                            socket.try_write(reply)?;
                         },
                         Cmd::GetIsoSize => {
                             let maybe_iso = self.files.get(msg.iso_index as usize);
@@ -222,7 +223,8 @@ impl Server {
                         },
                         Cmd::MountIso => {
                             let mut iso_name = vec![0; msg.length as usize];
-                            socket.read(&mut iso_name).await?;
+                            assert_eq!(socket.read(&mut iso_name).await?, msg.length as usize);
+
                             let iso_name_human = String::from_utf8(iso_name)?;
 
                             let normalized = iso_name_human
@@ -322,6 +324,4 @@ async fn main() -> Result<(), Box<dyn Error>> {
             srv.handle_connection(socket).await
         });
     }
-
-    Ok(())
 }
