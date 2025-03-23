@@ -134,13 +134,13 @@ impl Server {
         }
     }
 
-    async fn handle_connection(&mut self, mut socket: tokio::net::TcpStream) -> Result<(), Box<dyn std::error::Error>> {
+    async fn handler(&mut self, mut socket: tokio::net::TcpStream) -> Result<(), Box<dyn std::error::Error>> {
         loop {
             let mut buffer = [0; 20];
             match socket.read(&mut buffer).await {
                 Ok(size) => {
                     if size <= 0 {
-                        eprintln!("EOF - Client disconnected");
+                        eprintln!("EOF - Client '{:?}' disconnected", socket.peer_addr());
                         break
                     }
 
@@ -235,23 +235,29 @@ impl Server {
                                         1 // success
                                     },
                                     None => {
+                                        eprintln!("MountIso: Failed to find ISO '{normalized}' !");
                                         0 // error
                                     }
                                 };
     
                                 socket.try_write(&code.to_be_bytes())?;
                             }
-                        },
-                        _ => todo!()
+                        }
                     }
                 },
                 Err(err) => {
-                    eprintln!("Failed... {err}");
+                    eprintln!("Failed reading from socket, err: {err}");
                 }
             }
         }
 
         Ok(())
+    }
+
+    async fn handle_connection(&mut self, socket: tokio::net::TcpStream) {
+        if let Err(err) = self.handler(socket).await {
+            eprintln!("Connection handler exited with error: {err}");
+        }
     }
 }
 
@@ -266,17 +272,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     let filepath = Path::new(&args[1]);
 
+    println!("Enumerating ISOs in {filepath:?}...");
     let files = get_iso_files(filepath).await?;
 
     if files.is_empty() {
         return Err("No iso files enumerated".into());
     }
 
+    println!("Found the following ISOs");
     for (index, file) in files.iter().enumerate() {
         println!("{index}: {}", &file.filename);
     }
 
     let listener = TcpListener::bind(("0.0.0.0", NETISO_SRV_PORT)).await?;
+    println!("Start listening for incoming connections...");
 
     loop {
         let (socket, _) = listener.accept().await?;
@@ -288,7 +297,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 files: files_clone,
                 ..Default::default()
             };
-            srv.handle_connection(socket).await.unwrap()
+            srv.handle_connection(socket).await
         });
     }
 
