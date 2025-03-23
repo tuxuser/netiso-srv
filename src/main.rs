@@ -275,22 +275,37 @@ impl Server {
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let mut args: Vec<String> = env::args().collect();
-    
-    // Check for '-r' (recursive scan) arg
-    let recursive_scan = match args.iter().position(|x| "-r" == x) {
+fn print_usage(bin_name: &str) {
+    eprintln!("Usage: {} [-r] [iso directory path]", bin_name);
+    eprintln!("\nArgs:");
+    eprintln!("\t-r - Recursive ISO scanning");
+    eprintln!("\t-h - Print help / usage")
+}
+
+fn check_arg(args: &mut Vec<String>, arg_name: &str) -> bool {
+    match args.iter().position(|x| arg_name == x) {
         Some(removal_index) => {
             args.remove(removal_index);
             true
         },
         None => false
-    };
+    }
+}
 
-    if args.len() < 2 {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let mut args: Vec<String> = env::args().collect();
+
+    let print_help = check_arg(&mut args, "-h"); // Help
+    let recursive_scan = check_arg(&mut args, "-r"); // Recursive iso scanning
+
+    if print_help {
+        print_usage(&args[0]);
+        return Ok(());
+    }
+    else if args.len() < 2 {
         eprintln!("ERROR: Invalid number of arguments!");
-        eprintln!("Usage: {} [iso directory path]", args[0]);
+        print_usage(&args[0]);
         return Ok(());
     }
 
