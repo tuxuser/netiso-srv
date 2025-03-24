@@ -1,3 +1,7 @@
+[![Build](https://github.com/tuxuser/netiso-srv/actions/workflows/build.yml/badge.svg)](https://github.com/tuxuser/netiso-srv/actions/workflows/build.yml)
+[![Docker image tags](https://ghcr-badge.egpl.dev/tuxuser/netiso-srv-rs/tags?color=%2344cc11&ignore=latest&n=3&label=image+tags&trim=)](https://github.com/tuxuser/netiso-srv/pkgs/container/netiso-srv-rs)
+[![GitHub Release](https://img.shields.io/github/v/release/tuxuser/netiso-srv)](https://github.com/tuxuser/netiso-srv/releases/latest)
+
 # NetISO server daemon
 
 ## Usage
