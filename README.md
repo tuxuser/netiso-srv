@@ -15,15 +15,9 @@ Run: `netiso-srv [-r] [directory with *.iso files]`
 
 ## Docker
 
-To build the docker image
-
-```
-docker build -t netiso:local .
-```
-
 Spawn container standalone
 ```
-docker run -p 4323:4323 -v /path/to/isos:/mnt netiso:local
+docker run -p 4323:4323 -v /path/to/isos:/mnt ghcr.io/tuxuser/netiso-srv-rs:latest
 ```
 
 or
@@ -33,4 +27,22 @@ Spawn via docker compose
 docker compose up
 ```
 
-See `Dockerfile` and use `musl`-binary of `netiso-srv`.
+## Development
+
+### Build
+
+```
+cargo build [--release]
+```
+
+### Build docker image locally
+
+Make sure to have the `netiso-srv` built and available in current directory.
+
+Build the image:
+
+```
+docker build -t netiso:localdev .
+```
+
+The resulting docker image is now ready-to-use from `netiso:localdev`, see `Docker`-steps above for regular docker-usage.
