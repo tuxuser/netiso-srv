@@ -41,7 +41,7 @@ jobs:
   trigger_docker:
     name: Trigger docker build
     needs: [build]
-    if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ success() }}
     uses: ./.github/workflows/docker.yml
     with:
       workflow-run-id: "${{ github.run_id }}"
