@@ -2,7 +2,7 @@ version: "3"
 
 services:
   netiso:
-    image: netiso:local
+    image: ghcr.io/tuxuser/netiso-srv-rs:latest
     volumes:
       - /x360/games:/mnt
     ports:
