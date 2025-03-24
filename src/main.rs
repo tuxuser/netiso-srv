@@ -87,9 +87,13 @@ async fn get_data_start(file: &mut File) -> Result<u64, Box<dyn std::error::Erro
     Ok(0)
 }
 
-async fn get_iso_files(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry>, Box<dyn std::error::Error>> {
-    let mut ret = vec![];
+async fn get_iso_files(old_entries: &Vec<IsoEntry>, directory: &Path, recursive: bool) -> Result<Vec<IsoEntry>, Box<dyn std::error::Error>> {
+    let mut ret = old_entries.clone();
 
+    // First, throw out obsolete entries
+    ret.retain(|x| x.path.exists());
+
+    // Assemble glob pattern
     let isofiles_glob_pattern = {
         let mut path_glob = directory.to_str().unwrap().to_string();
         if recursive {
@@ -103,10 +107,18 @@ async fn get_iso_files(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry
         path_glob
     };
 
-    println!("Path: {isofiles_glob_pattern}");
+    // Search for new files
     let files: Vec<PathBuf> = glob(&isofiles_glob_pattern)?
         .filter_map(|x| x.ok())
+        // Filter for existing files
         .filter(|x|x.is_file())
+        // Filter for new files (PathBuf not identical to any previous entry)
+        .filter(|x|
+            ret
+                .iter()
+                .find(|y|y.path == *x)
+                .is_none()
+        )
         .collect();
 
     for filepath in files {
@@ -138,6 +150,10 @@ async fn get_iso_files(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry
     }
 
     Ok(ret)
+}
+
+async fn scan_iso_files_initial(directory: &Path, recursive: bool) -> Result<Vec<IsoEntry>, Box<dyn std::error::Error>> {
+    get_iso_files(&vec![], directory, recursive).await
 }
 
 impl Server {
@@ -312,7 +328,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let filepath = Path::new(&args[1]);
 
     println!("Enumerating ISOs in {filepath:?}...");
-    let files = get_iso_files(filepath, recursive_scan).await?;
+    let mut files = scan_iso_files_initial(filepath, recursive_scan).await?;
 
     if files.is_empty() {
         return Err("No iso files enumerated".into());
@@ -327,6 +343,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Start listening for incoming connections...");
 
     loop {
+        // Update list of isos
+        files = get_iso_files(&files, filepath, recursive_scan).await?;
+
         let (socket, _) = listener.accept().await?;
         println!("Got connection from: {:?}", &socket.peer_addr());
 
