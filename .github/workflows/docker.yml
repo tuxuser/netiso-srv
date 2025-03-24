@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [aarch64-unknown-linux-musl, arm-unknown-linux-musleabi, x86_64-unknown-linux-musl]
+        arch: [aarch64-unknown-linux-musl, arm-unknown-linux-musleabi, i686-unknown-linux-musl, x86_64-unknown-linux-musl]
         include:
           - arch: aarch64-unknown-linux-musl
             buildx-platform: linux/arm64
@@ -24,6 +24,8 @@ jobs:
             buildx-platform: linux/arm/v7
           - arch: x86_64-unknown-linux-musl
             buildx-platform: linux/amd64
+          - arch: i686-unknown-linux-musl
+            buildx-platform: linux/386
 
     steps:
       - name: Checkout
