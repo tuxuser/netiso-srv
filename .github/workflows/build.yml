@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [aarch64-linux-android, aarch64-unknown-linux-musl, arm-unknown-linux-musleabi, i686-pc-windows-gnu, x86_64-pc-windows-gnu, x86_64-unknown-linux-musl]
+        target: [aarch64-linux-android, aarch64-unknown-linux-musl, arm-unknown-linux-musleabi, i686-pc-windows-gnu, x86_64-pc-windows-gnu, i686-unknown-linux-musl, x86_64-unknown-linux-musl]
 
     steps:
       - name: Checkout
@@ -36,6 +37,14 @@ jobs:
           path: |
             README.md
             target/${{ matrix.target }}/release/netiso-srv*
+
+  trigger_docker:
+    name: Trigger docker build
+    needs: [build]
+    if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
+    uses: ./.github/workflows/docker.yml
+    with:
+      workflow-run-id: "${{ github.run_id }}"
 
   release:
     name: Release
