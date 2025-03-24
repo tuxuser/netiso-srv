@@ -9,6 +9,7 @@
 Options:
 
     `-r` - Recursive scanning for ISO files
+    `-h` - Print usage
 
 Run: `netiso-srv [-r] [directory with *.iso files]`
 
