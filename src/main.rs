@@ -343,11 +343,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Start listening for incoming connections...");
 
     loop {
-        // Update list of isos
-        files = get_iso_files(&files, filepath, recursive_scan).await?;
-
         let (socket, _) = listener.accept().await?;
         println!("Got connection from: {:?}", &socket.peer_addr());
+
+        // Update list of isos
+        files = get_iso_files(&files, filepath, recursive_scan).await?;
 
         let files_clone = files.clone();
         tokio::spawn(async move {
