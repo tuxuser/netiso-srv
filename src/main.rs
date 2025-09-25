@@ -57,6 +57,8 @@ struct Message {
 struct Server {
     files: Vec<IsoEntry>,
     active_file: Option<File>,
+    // After unmount, next query for iso size should return 0
+    next_iso_size_query_zero: bool,
 }
 
 async fn get_data_start(file: &mut File) -> Result<u64, Box<dyn std::error::Error>> {
@@ -161,6 +163,7 @@ impl Server {
         if self.active_file.is_some() {
             self.active_file = None;
         }
+        self.next_iso_size_query_zero = true;
     }
 
     async fn handler(&mut self, mut socket: tokio::net::TcpStream) -> Result<(), Box<dyn std::error::Error>> {
@@ -182,6 +185,13 @@ impl Server {
                             socket.try_write(reply)?;
                         },
                         Cmd::GetIsoSize => {
+                            // Directly after unmount, netiso.xex queries for the iso size again and expects 0
+                            if self.next_iso_size_query_zero {
+                                self.next_iso_size_query_zero = false;
+                                socket.try_write(&0u64.to_be_bytes())?;
+                                continue;
+                            }
+
                             let maybe_iso = self.files.get(msg.iso_index as usize);
                             let sector_count = match maybe_iso {
                                 Some(iso) => {
@@ -253,7 +263,7 @@ impl Server {
                             if normalized == "[Disable Current ISO]" {
                                 println!("Unmounting current iso...");
                                 self.disable_current_iso().await;
-                                let code = 1u32;
+                                let code = 0u32;
                                 socket.try_write(&code.to_be_bytes())?;
                             } else {
                                 let found = self.files.iter().find(|x| x.filename.ends_with(&normalized));
