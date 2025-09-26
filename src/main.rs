@@ -190,6 +190,10 @@ impl Server {
                                 self.next_iso_size_query_zero = false;
                                 socket.try_write(&0u64.to_be_bytes())?;
                                 continue;
+                            } else if msg.iso_index == 132 {
+                                // Weird fix, why does it request iso index: 132 (0x84) and expects 0 in return?
+                                socket.try_write(&0u64.to_be_bytes())?;
+                                continue;
                             }
 
                             let maybe_iso = self.files.get(msg.iso_index as usize);
