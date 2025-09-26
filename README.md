@@ -9,9 +9,11 @@
 Options:
 
     `-r` - Recursive scanning for ISO files
+    `-b` - Enable workaround for big iso library (132+ games)
+    `-v` - Verbose output
     `-h` - Print usage
 
-Run: `netiso-srv [-r] [directory with *.iso files]`
+Run: `netiso-srv [-rbvh] [directory with *.iso files]`
 
 
 ## Docker

@@ -59,6 +59,8 @@ struct Server {
     active_file: Option<File>,
     // After unmount, next query for iso size should return 0
     next_iso_size_query_zero: bool,
+    verbose: bool,
+    big_library: bool,
 }
 
 async fn get_data_start(file: &mut File) -> Result<u64, Box<dyn std::error::Error>> {
@@ -179,6 +181,10 @@ impl Server {
                     let mut cur = Cursor::new(&buffer);
                     let msg = Message::read(&mut cur)?;
 
+                    if self.verbose {
+                        println!("< {msg:?}");
+                    }
+
                     match msg.cmd_type {
                         Cmd::Ping => {
                             let reply = "ISVRokOK".as_bytes();
@@ -190,8 +196,9 @@ impl Server {
                                 self.next_iso_size_query_zero = false;
                                 socket.try_write(&0u64.to_be_bytes())?;
                                 continue;
-                            } else if msg.iso_index == 132 {
+                            } else if self.big_library && msg.iso_index == 132 {
                                 // Weird fix, why does it request iso index: 132 (0x84) and expects 0 in return?
+                                // -> This makes iso at index 132 unplayable...
                                 socket.try_write(&0u64.to_be_bytes())?;
                                 continue;
                             }
@@ -306,9 +313,11 @@ impl Server {
 }
 
 fn print_usage(bin_name: &str) {
-    eprintln!("Usage: {} [-r] [iso directory path]", bin_name);
+    eprintln!("Usage: {} [-rbvh] [iso directory path]", bin_name);
     eprintln!("\nArgs:");
     eprintln!("\t-r - Recursive ISO scanning");
+    eprintln!("\t-b - Enable workaround for big iso library (132+ games)");
+    eprintln!("\t-v - Verbose output");
     eprintln!("\t-h - Print help / usage")
 }
 
@@ -328,6 +337,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let print_help = check_arg(&mut args, "-h"); // Help
     let recursive_scan = check_arg(&mut args, "-r"); // Recursive iso scanning
+    let biglib = check_arg(&mut args, "-b"); // Enable workaround for big iso library (132+)
+    let verbose = check_arg(&mut args, "-v"); // Verbose / Debug
 
     if print_help {
         print_usage(&args[0]);
@@ -367,6 +378,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         tokio::spawn(async move {
             let mut srv = Server {
                 files: files_clone,
+                verbose: verbose,
+                big_library: biglib,
                 ..Default::default()
             };
             srv.handle_connection(socket).await
