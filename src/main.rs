@@ -22,6 +22,12 @@ enum IsoType {
     XGD3
 }
 
+#[derive(Debug)]
+struct ActiveIso {
+    file: File,
+    metadata: IsoEntry,
+}
+
 #[derive(Clone, Debug)]
 struct IsoEntry {
     path: PathBuf,
@@ -56,11 +62,8 @@ struct Message {
 #[derive(Default, Debug)]
 struct Server {
     files: Vec<IsoEntry>,
-    active_file: Option<File>,
-    // After unmount, next query for iso size should return 0
-    next_iso_size_query_zero: bool,
+    active_file: Option<ActiveIso>,
     verbose: bool,
-    big_library: bool,
 }
 
 async fn get_data_start(file: &mut File) -> Result<u64, Box<dyn std::error::Error>> {
@@ -165,7 +168,6 @@ impl Server {
         if self.active_file.is_some() {
             self.active_file = None;
         }
-        self.next_iso_size_query_zero = true;
     }
 
     async fn handler(&mut self, mut socket: tokio::net::TcpStream) -> Result<(), Box<dyn std::error::Error>> {
@@ -175,6 +177,7 @@ impl Server {
                 Ok(size) => {
                     if size == 0 {
                         eprintln!("EOF - Client '{:?}' disconnected", socket.peer_addr());
+                        self.disable_current_iso().await;
                         break
                     }
 
@@ -191,26 +194,13 @@ impl Server {
                             socket.try_write(reply)?;
                         },
                         Cmd::GetIsoSize => {
-                            // Directly after unmount, netiso.xex queries for the iso size again and expects 0
-                            if self.next_iso_size_query_zero {
-                                self.next_iso_size_query_zero = false;
-                                socket.try_write(&0u64.to_be_bytes())?;
-                                continue;
-                            } else if self.big_library && msg.iso_index == 132 {
-                                // Weird fix, why does it request iso index: 132 (0x84) and expects 0 in return?
-                                // -> This makes iso at index 132 unplayable...
-                                socket.try_write(&0u64.to_be_bytes())?;
-                                continue;
-                            }
-
-                            let maybe_iso = self.files.get(msg.iso_index as usize);
-                            let sector_count = match maybe_iso {
+                            // Get iso sector count for mounted file
+                            // If no iso is mounted, reply with 0
+                            let sector_count = match &self.active_file {
                                 Some(iso) => {
-                                    iso.sector_count
+                                    iso.metadata.sector_count
                                 },
-                                None => {
-                                    0
-                                }
+                                None => 0,
                             };
 
                             let mut resp = vec![];
@@ -233,11 +223,11 @@ impl Server {
                             socket.try_write(&has_type1_file.to_be_bytes())?;
                         },
                         Cmd::ReadData => {
-                            if let Some(file) = self.active_file.as_mut() {
+                            if let Some(active) = self.active_file.as_mut() {
                                 let mut buf = vec![0u8; msg.length as usize];
 
-                                file.seek(std::io::SeekFrom::Start(msg.offset)).await?;
-                                file.read_exact(&mut buf).await?;
+                                active.file.seek(std::io::SeekFrom::Start(msg.offset)).await?;
+                                active.file.read_exact(&mut buf).await?;
 
                                 socket.try_write(&buf)?;
                             }
@@ -282,7 +272,8 @@ impl Server {
                                 let code: u32 = match found {
                                     Some(iso) => {
                                         println!("Mounting: {:?}", iso.path);
-                                        self.active_file = Some(File::open(&iso.path).await?);
+                                        let file = File::open(&iso.path).await?;
+                                        self.active_file = Some(ActiveIso { file: file, metadata: iso.to_owned() });
                                         1 // success
                                     },
                                     None => {
@@ -337,7 +328,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let print_help = check_arg(&mut args, "-h"); // Help
     let recursive_scan = check_arg(&mut args, "-r"); // Recursive iso scanning
-    let biglib = check_arg(&mut args, "-b"); // Enable workaround for big iso library (132+)
     let verbose = check_arg(&mut args, "-v"); // Verbose / Debug
 
     if print_help {
@@ -379,7 +369,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut srv = Server {
                 files: files_clone,
                 verbose: verbose,
-                big_library: biglib,
                 ..Default::default()
             };
             srv.handle_connection(socket).await

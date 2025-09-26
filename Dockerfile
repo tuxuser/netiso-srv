@@ -10,4 +10,4 @@ EXPOSE 4323/TCP
 # Quick smoke test
 RUN /app/netiso-srv -h
 
-CMD ["/app/netiso-srv", "-b", "-r", "/mnt"]
+CMD ["/app/netiso-srv", "-r", "/mnt"]
