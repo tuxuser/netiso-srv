@@ -13,7 +13,7 @@ Options:
     `-v` - Verbose output
     `-h` - Print usage
 
-Run: `netiso-srv [-rbvh] [directory with *.iso files]`
+Run: `netiso-srv [-r] [-b] [-v] [-h] [directory with *.iso files]`
 
 
 ## Docker
