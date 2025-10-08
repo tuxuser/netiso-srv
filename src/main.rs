@@ -109,7 +109,7 @@ async fn get_iso_files(old_entries: &Vec<IsoEntry>, directory: &Path, recursive:
         }
 
         path_glob += std::path::MAIN_SEPARATOR_STR;
-        path_glob += "*.iso";
+        path_glob += "*.[iI][sS][oO]"; // This matches .iso, .ISO, .Iso, .iSO, etc.
 
         path_glob
     };
