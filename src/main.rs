@@ -1,7 +1,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use binrw::{BinRead, BinWrite};
-use glob::glob;
+use glob::{glob_with, MatchOptions};
 use tokio::fs::File;
 use std::env;
 use std::error::Error;
@@ -115,7 +115,7 @@ async fn get_iso_files(old_entries: &Vec<IsoEntry>, directory: &Path, recursive:
     };
 
     // Search for new files
-    let files: Vec<PathBuf> = glob(&isofiles_glob_pattern)?
+    let files: Vec<PathBuf> = glob_with(&isofiles_glob_pattern, MatchOptions::default())?
         .filter_map(|x| x.ok())
         // Filter for existing files
         .filter(|x|x.is_file())
