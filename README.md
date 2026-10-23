@@ -4,6 +4,10 @@
 
 # NetISO server daemon
 
+RUST rewrite of the NetISO server. Original plugin + server: <https://github.com/XeFreedom/NetISO>
+
+Thanks cOz!
+
 ## Usage
 
 Options:
