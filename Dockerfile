@@ -10,4 +10,5 @@ EXPOSE 4323/TCP
 # Quick smoke test
 RUN /app/netiso-srv -h
 
-CMD ["/app/netiso-srv", "-r", "/mnt"]
+# Wildcard bind inside the container; the port publish decides who can reach it.
+CMD ["/app/netiso-srv", "-r", "-b", "0.0.0.0", "/mnt"]

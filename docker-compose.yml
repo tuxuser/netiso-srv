@@ -6,4 +6,5 @@ services:
     volumes:
       - /x360/games:/mnt
     ports:
-      - 4323:4323
+      # Publish on the NAS address the console talks to, not on every interface.
+      - "${NAS_LAN_IP:?set NAS_LAN_IP to the NAS address the Xbox uses}:4323:4323"
