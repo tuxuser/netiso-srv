@@ -1,0 +1,35 @@
+misnamed?:      _scprintf @313          ; lib name: RtlScprintf
+misnamed?:      _snprintf @314          ; lib name: RtlSnprintf
+misnamed?:      sprintf @315            ; lib name: RtlSprintf
+misnamed?:      _scwprintf @316         ; lib name: RtlScwprintf
+misnamed?:      _snwprintf @317         ; lib name: RtlSnwprintf
+misnamed?:      _swprintf @318          ; lib name: RtlSwprintf
+misnamed?:      _vscprintf @332         ; lib name: RtlVscprintf
+misnamed?:      _vsnprintf @333         ; lib name: RtlVsnprintf
+misnamed?:      vsprintf @334           ; lib name: RtlVsprintf
+misnamed?:      _vscwprintf @335                ; lib name: RtlVscwprintf
+misnamed?:      _vsnwprintf @336                ; lib name: RtlVsnwprintf
+misnamed?:      _vswprintf @337         ; lib name: RtlVswprintf
+misnamed?:      KeTlsAlloc @338         ; lib name: TlsAlloc
+misnamed?:      KeTlsFree @339          ; lib name: TlsFree
+misnamed?:      KeTlsGetValue @340              ; lib name: TlsGetValue
+misnamed?:      KeTlsSetValue @341              ; lib name: TlsSetValue
+
+
+	XamLoaderGetMediaInfo @419		; lib name: XamGetMediaInfo
+	XamLoaderLaunchTitle @420		; lib name: XamLaunchNewImage
+	XamLoaderLaunchTitleEx @421		; lib name: XLaunchNewImageEx
+	XamLoaderSetLaunchData @422		; lib name: XSetLaunchData
+	XamLoaderGetLaunchDataSize @423		; lib name: XGetLaunchDataSize
+	XamLoaderGetLaunchData @424		; lib name: XGetLaunchData
+	XamLoaderTerminateTitle @425		; lib name: XamTerminateTitle
+	XamLoaderGetDvdTrayState @426		; lib name: XGetTrayState
+	XamLoaderGetGameInfo @427		; lib name: XamGetGameInfo
+	XamLoaderLaunchTitleOnDvd @428		; lib name: XLaunchMedia
+	XamLoaderSetSpindleSpeed @429		; lib name: XamSetDvdSpindleSpeed
+	XamLoaderIsTitleTerminatePending @444		; lib name: XamIsTitleTerminatePending
+	XamLoaderGetPriorTitleId @446		; lib name: XamGetPreviousTitleId
+	XamLoaderGetMediaInfoEx @483		; lib name: XamGetMediaInfoEx
+	XamMarketplaceAcquireFreeContent @1324		; lib name: XMarketplaceAcquireFreeContent
+	XamSetLastActiveUserData @2014		; lib name: XSetLastActiveUserData
+	XamGetLastActiveUserData @2015		; lib name: XGetLastActiveUserData

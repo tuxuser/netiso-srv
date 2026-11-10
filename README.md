@@ -70,6 +70,12 @@ NAS_LAN_IP=192.168.1.10 docker compose up
 For the lowest latency use host networking instead of a published port
 (`--network host`), and then pass `-b <NAS LAN IP>` as the bind address.
 
+## Client (Xbox 360 plugin)
+
+The console side, `netiso.xex`, lives in [`client/`](client/) with its own
+README. It builds only with the Microsoft Xbox 360 SDK on Windows, so the
+GitHub Actions workflows here cover the server alone.
+
 ## Development
 
 ### Build

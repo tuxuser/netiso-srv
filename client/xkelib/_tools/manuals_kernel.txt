@@ -1,0 +1,30 @@
+  Symbol name  : KiApcNormalRoutineNop
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 413
+
+  Symbol name  : KiApcNormalRoutineNop
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 479
+
+  Symbol name  : _vscprintf
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 332
+
+  Symbol name  : vsprintf
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 334
+
+  Symbol name  : sprintf
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 315
+
+  Symbol name  : _vscwprintf
+  Type         : code
+  Name type    : ordinal
+  Ordinal      : 335
+

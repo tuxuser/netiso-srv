@@ -16,3 +16,16 @@ target/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+
+# Visual Studio / XDK build output of the Xbox 360 client
+client/**/Debug/
+client/**/Release/
+client/**/Release_LTCG/
+client/**/*.lib
+client/**/*.exp
+client/**/*.pch
+client/**/*.xex
+client/**/*.sdf
+client/**/*.suo
+client/**/*.opensdf
+client/.vs/

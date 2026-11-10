@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<xex>
+	<version major="0x02" minor="0x00" build="0x22FB" qfe="0x00"/>
+
+	<baseaddr addr = "0x91100000"/>
+
+	<gameregion>
+	   <all/>
+	</gameregion>
+
+	<format>
+		<compressed/>
+	</format>
+
+	<sysdll/>
+
+	<exportcontainer name="bam.def"/>
+
+	<mediatypes>
+		<harddisk/>
+		<flash/>
+		<usbmass/>
+		<network/>
+		<ram/>
+		<svod/>
+		<allpackages/>
+	</mediatypes>
+	
+	<mfgmode mode = "aware"/>
+
+</xex>
